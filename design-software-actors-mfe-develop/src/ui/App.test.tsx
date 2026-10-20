@@ -27,6 +27,10 @@ vi.mock('../infrastructure/actors-api', () => ({
 
 const instructor: Instructor = {
   id: 'inst-1',
+  user_id: 'user-1',
+  document_type: 'CC',
+  default_max_hours_per_week: 40,
+  is_active: true,
   first_name: 'Juan',
   last_name: 'Pérez',
   full_name: 'Juan Pérez',
@@ -91,6 +95,7 @@ describe('instructor administration', () => {
     render(<App />)
 
     fireEvent.click(screen.getByRole('button', { name: /Nuevo instructor/ }))
+    fireEvent.change(screen.getByLabelText('ID de usuario IAM'), { target: { value: 'user-2' } })
     fireEvent.change(screen.getByLabelText('Nombre(s)'), { target: { value: 'Laura' } })
     fireEvent.change(screen.getByLabelText('Apellido(s)'), { target: { value: 'Gómez' } })
     expect(screen.getByLabelText('Nombre completo derivado')).toHaveValue('Laura Gómez')
@@ -100,6 +105,9 @@ describe('instructor administration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Guardar perfil' }))
 
     await waitFor(() => expect(actorsApi.createInstructor).toHaveBeenCalledWith({
+      user_id: 'user-2',
+      document_type: 'CC',
+      default_max_hours_per_week: 40,
       first_name: 'Laura',
       last_name: 'Gómez',
       document_number: '123456',
@@ -122,6 +130,9 @@ describe('instructor administration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Guardar perfil' }))
 
     await waitFor(() => expect(actorsApi.updateInstructor).toHaveBeenCalledWith('inst-1', {
+      user_id: 'user-1',
+      document_type: 'CC',
+      default_max_hours_per_week: 40,
       first_name: 'Juan',
       last_name: 'Pérez',
       document_number: '1075421336',

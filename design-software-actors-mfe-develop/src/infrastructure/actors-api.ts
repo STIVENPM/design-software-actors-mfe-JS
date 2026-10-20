@@ -16,12 +16,15 @@ import { demoModeEnabled } from './api-mode'
 
 const API_BASE_URL = (import.meta.env.VITE_ACTORS_API_BASE_URL || '/api/v1').replace(/\/$/, '')
 export const isDemoMode = demoModeEnabled()
+let accessTokenProvider: () => string | null = () => sessionStorage.getItem('sena.access_token')
+export function setAccessTokenProvider(provider: () => string | null) { accessTokenProvider = provider }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
       Accept: 'application/json',
+      ...(accessTokenProvider() ? { Authorization: `Bearer ${accessTokenProvider()}` } : {}),
       ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
       ...init?.headers,
     },
@@ -45,26 +48,30 @@ function listPath(status: InstructorStatusFilter): string {
 }
 
 export const httpActorsApi = {
-  listInstructors(status: InstructorStatusFilter): Promise<Instructor[]> {
-    return request<Instructor[]>(listPath(status))
+  async listInstructors(status: InstructorStatusFilter): Promise<Instructor[]> {
+    const result = await request<{ data: Instructor[] }>(listPath(status))
+    return result.data.map(item => ({ ...item, status: item.is_active ? 'active' : 'inactive' }))
   },
 
-  getInstructor(id: string): Promise<Instructor> {
-    return request<Instructor>(`/instructors/${encodeURIComponent(id)}`)
+  async getInstructor(id: string): Promise<Instructor> {
+    const item = await request<Instructor>(`/instructors/${encodeURIComponent(id)}`)
+    return { ...item, status: item.is_active ? 'active' : 'inactive' }
   },
 
-  createInstructor(input: InstructorInput): Promise<Instructor> {
-    return request<Instructor>('/instructors', {
+  async createInstructor(input: InstructorInput): Promise<Instructor> {
+    const item = await request<Instructor>('/instructors', {
       method: 'POST',
       body: JSON.stringify(input),
     })
+    return { ...item, status: item.is_active ? 'active' : 'inactive' }
   },
 
-  updateInstructor(id: string, input: InstructorInput): Promise<Instructor> {
-    return request<Instructor>(`/instructors/${encodeURIComponent(id)}`, {
-      method: 'PUT',
+  async updateInstructor(id: string, input: InstructorInput): Promise<Instructor> {
+    const item = await request<Instructor>(`/instructors/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
       body: JSON.stringify(input),
     })
+    return { ...item, status: item.is_active ? 'active' : 'inactive' }
   },
 
   deactivateInstructor(id: string): Promise<void> {

@@ -10,9 +10,16 @@ export interface Instructor {
   email: string
   phone: string
   status: InstructorStatus
+  is_active?: boolean
+  user_id?: string
+  document_type?: 'CC' | 'CE' | 'PA' | 'PE'
+  default_max_hours_per_week?: number
 }
 
 export interface InstructorInput {
+  user_id?: string
+  document_type?: 'CC' | 'CE' | 'PA' | 'PE'
+  default_max_hours_per_week?: number
   first_name: string
   last_name: string
   document_number: string

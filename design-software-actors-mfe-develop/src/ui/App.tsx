@@ -39,7 +39,7 @@ import type {
 } from '../domain/instructor'
 import { ApiError } from '../domain/instructor'
 import type { CompetencySelection } from '../domain/instructor-competency'
-import { actorsApi } from '../infrastructure/actors-api'
+import { actorsApi, setAccessTokenProvider } from '../infrastructure/actors-api'
 import { isDemoMode } from '../infrastructure/actors-api'
 import './styles.css'
 
@@ -62,6 +62,9 @@ export interface AppProps extends ActorsMfeProps {
 }
 
 const EMPTY_INSTRUCTOR: InstructorInput = {
+  user_id: '',
+  document_type: 'CC',
+  default_max_hours_per_week: 40,
   first_name: '',
   last_name: '',
   document_number: '',
@@ -81,7 +84,8 @@ function displayDate(value: string) {
   )
 }
 
-function App({ basePath, CompetencySelector, canManageCompetencies = false }: AppProps = {}) {
+function App({ basePath, CompetencySelector, canManageCompetencies = false, getAccessToken }: AppProps = {}) {
+  if (getAccessToken) setAccessTokenProvider(getAccessToken)
   const [status, setStatus] = useState<InstructorStatusFilter>('active')
   const [dialog, setDialog] = useState<DialogState>(null)
   const [search, setSearch] = useState('')
@@ -344,6 +348,9 @@ function InstructorForm({
 }) {
   const [form, setForm] = useState<InstructorInput>(instructor
     ? {
+        user_id: instructor.user_id ?? '',
+        document_type: instructor.document_type ?? 'CC',
+        default_max_hours_per_week: instructor.default_max_hours_per_week ?? 40,
         first_name: instructor.first_name,
         last_name: instructor.last_name,
         document_number: instructor.document_number,
@@ -386,6 +393,9 @@ function InstructorForm({
           <label className="full-width">Nombre completo <span className="readonly-tag">Derivado · solo lectura</span>
             <input value={derivedName} readOnly aria-label="Nombre completo derivado" placeholder="Se genera con nombre y apellido" />
           </label>
+          {!instructor && <label>ID de usuario IAM<input required value={form.user_id} onChange={event => update('user_id', event.target.value)} placeholder="UUID de usuario existente" /></label>}
+          <label>Tipo de documento<select value={form.document_type} onChange={event => update('document_type', event.target.value as InstructorInput['document_type'])}><option value="CC">CC</option><option value="CE">CE</option><option value="PA">PA</option><option value="PE">PE</option></select></label>
+          <label>Horas máximas por semana<input required type="number" min="0" value={form.default_max_hours_per_week} onChange={event => update('default_max_hours_per_week', Number(event.target.value))} /></label>
           <label>Número de documento<input required value={form.document_number} onChange={event => update('document_number', event.target.value)} /></label>
           <label>Correo electrónico<input required type="email" value={form.email} onChange={event => update('email', event.target.value)} /></label>
           <label className="full-width">Teléfono<input value={form.phone} onChange={event => update('phone', event.target.value)} /></label>

@@ -22,7 +22,7 @@ export const AuthClient = {
   async currentUser(): Promise<CurrentUser> {
     if (demoModeEnabled()) return DEMO_USER
     const response = await fetch(`${IAM_API_BASE_URL}/auth/me`, {
-      headers: { Accept: 'application/json' },
+      headers: { Accept: 'application/json', ...(sessionStorage.getItem('sena.access_token') ? { Authorization: `Bearer ${sessionStorage.getItem('sena.access_token')}` } : {}) },
       credentials: 'same-origin',
     })
     if (!response.ok) {
