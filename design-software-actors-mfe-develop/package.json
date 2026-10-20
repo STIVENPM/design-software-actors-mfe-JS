@@ -1,0 +1,34 @@
+{
+  "name": "actors-mfe",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "generate:types": "openapi-typescript contracts/openapi/actors.yaml -o src/generated/actors.ts && openapi-typescript contracts/openapi/iam.yaml -o src/generated/iam.ts",
+    "build": "tsc -b && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:tokens": "node ../design-software-design-system/scripts/check-consumer-tokens.mjs --consumer actors-mfe"
+  },
+  "dependencies": {
+    "@sena/design-system": "file:../design-software-design-system",
+    "@module-federation/vite": "^1.23.5",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@sena/frontend-platform": "file:../design-software-frontend-platform",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "openapi-typescript": "7.13.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.4.4",
+    "vitest": "^4.1.11"
+  }
+}
